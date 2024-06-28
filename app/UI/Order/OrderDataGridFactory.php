@@ -24,8 +24,10 @@ class OrderDataGridFactory
 	{
 		$grid = $this->grid;
 
-		Debugger::barDump($grid->getDataSource());
+
 		$this->grid->setDataSource($this->orderRepository->loadData());
+
+		Debugger::barDump($grid->getDataSource());
 
 		$grid->addColumnNumber('id', 'id')
 			->setSortable()
@@ -68,8 +70,8 @@ class OrderDataGridFactory
 	{
 		$this->orderRepository->changeStatus($id, $newStatus);
 		$this->grid->setDataSource($this->orderRepository->loadData());
-		if ($this->isAjax()) {
-			$this['columnsGrid']->redrawItem($id);
+		if ($this->grid->getPresenter()->isAjax()) {
+			$this->grid->getPresenter()['columnsGrid']->redrawItem($id);
 		}
 	}
 }

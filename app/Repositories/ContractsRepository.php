@@ -2,27 +2,40 @@
 
 namespace App\Repositories;
 
+use Jajo\JSONDB;
+
 class ContractsRepository
 {
 
-	public function getAll()
+	const DB_FILE = 'contracts.json';
+
+	public function __construct(
+		private JSONDB $db,
+	)
 	{
-		return [
-			21 => "customer-sale",
-			321 => "customer-sale",
-			12 => "partner-sale",
-		];
 	}
 
-	public function get($customerId)
+	public function getAll()
 	{
-		switch ($customerId) {
-			case 23:
-				return [21 => "customer-sale"];
-			case 409:
-				return [321 => "customer-sale"];
-			case 143:
-				return [12 => "partner-sale"];
-		}
+		return $this->db->select('*')
+			->from( self::DB_FILE )
+			->get();
+	}
+
+	public function getByCustomer($customerId)
+	{
+		return $this->db->select( '*' )
+			->from( self::DB_FILE )
+			->where( ['customer' => $customerId] )
+			->get();
+	}
+
+	public function get($contractId)
+	{
+		return $this->db->select( '*' )
+			->from( self::DB_FILE )
+			->where( ['id' => $contractId] )
+			->get();
+
 	}
 }

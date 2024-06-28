@@ -2,86 +2,73 @@
 
 namespace App\Repositories;
 use App\Entities\Order;
-use http\Params;
-use Nette\Utils\Arrays;
-use Nette\Utils\Json;
+use App\Entities\Status;
+use Jajo\JSONDB;
+use Tracy\Debugger;
+
 class OrderRepository
 {
+	const DB_FILE = 'orders.json';
+
+	public function __construct(
+		private JSONDB $db,
+	)
+	{
+	}
 
 	public function getAll()
 	{
 		return $this->loadData();
 	}
+
 	public function loadData() : array
 	{
 		$data = [];
-		foreach (Json::decode($this->getJson(), forceArrays: true) as $item) {
+		$orders = $this->db->select( '*' )
+			->from( self::DB_FILE )
+			->get();
+
+		Debugger::barDump($orders);
+		foreach ($orders as $item) {
 			$data[] = $this->flatten($item);
 		}
 		return $data;
 	}
 
-	public function changeStatus($id, $newStatus) : void
+	public function changeStatus(int $orderId, Status $newStatus) : void
 	{
+		$order = $this->db->select( '*' )
+			->from( self::DB_FILE )
+			->where([ 'id' => $orderId ] )
+			->get();
 
+
+		if ($order['status']['id'] == $newStatus->getId()) {
+			return;
+		}
+
+		$order['status'] = $newStatus->toArray();
+
+		$this->db->update( $order )
+			->from( self::DB_FILE )
+			->where( [ 'id' => $orderId ] )
+			->trigger();
 	}
 
-	public function save(array $data)
+	public function save(Order $order)
 	{
-
+		$this->db->update( $order->toArray(true) )
+			->from( self::DB_FILE )
+			->where( [ 'id' => $order->getId() ] )
+			->trigger();
 	}
-	private function getJson() : string
+
+	public function get(int $orderId)
 	{
-		return '[{
-        "id": 332,
-        "orderNumber": "P3920-212",
-        "customerOrderNumber": "mazlík",
-        "createdAt": "2018-12-11T11:40:57+00:00",
-        "closedAt": null,
-        "status": {
-            "id": "ACT",
-            "name": "Active",
-            "createdAt": "2024-06-04T07:56:21+00:00",
-            "user": {
-                "userName": "jan.omacka",
-                "fullName": "Jan Omáčka"
-            }
-        },
-        "customer": {
-            "id": 23,
-            "name": "Miroslav Novák"
-        },
-        "contract": {
-            "id": 21,
-            "name": "customer-sale"
-        },
-        "requestedDeliveryAt": "2018-12-11T11:50:00+00:00"
-    },
-    {
-        "id": 619,
-        "orderNumber": "X4920-902",
-        "customerOrderNumber": "",
-        "createdAt": "2019-12-02T08:40:57+00:00",
-        "closedAt": null,
-        "status": {
-            "id": "NEW",
-            "name": "New",
-            "createdAt": "2022-06-04T07:56:21+00:00",
-            "user": {
-                "userName": "filip.houst",
-                "fullName": "Filip Houšť"
-            }
-        },
-        "customer": {
-            "id": 409,
-            "name": "Jan Mikulovský"
-        },
-        "contract": {
-            "id": 321,
-            "name": "customer-sale"
-        },
-        "requestedDeliveryAt": "2019-12-11T11:50:00+00:00"
-    }]';
+		return $this->db->select('*')
+			->from(self::DB_FILE)
+			->where(['id' => $orderId])
+			->get();
 	}
 
 	private static function flatten(array $data) : array

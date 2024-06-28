@@ -1,0 +1,17 @@
+[
+  {
+    "id": 21,
+    "name": "customer-sale",
+    "customer": 23
+  },
+  {
+    "id": 321,
+    "name": "customer-sale",
+    "customer": 409
+  },
+  {
+    "id": 12,
+    "name": "partner-sale",
+    "customer": 143
+  }
+]

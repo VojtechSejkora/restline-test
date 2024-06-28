@@ -8,6 +8,7 @@ class Contract
 	public function __construct(
 		private int $id,
 		private string $name,
+		private Customer $customer,
 	)
 	{
 
@@ -34,4 +35,21 @@ class Contract
 	}
 
 
+	public function getCustomer(): Customer
+	{
+		return $this->customer;
+	}
+
+	public function setCustomer(Customer $customer): void
+	{
+		$this->customer = $customer;
+	}
+
+	public function toArray()
+	{
+		return [
+			'id' => $this->getId(),
+			'name' => $this->getName(),
+		];
+	}
 }

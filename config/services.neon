@@ -1,9 +1,11 @@
 services:
 	- App\Core\RouterFactory::createRouter
+	- Jajo\JSONDB(%appDir%/../db)
 
 
 search:
-	-	in: %appDir%
+	-
+		in: %appDir%
 		classes:
 			- *Repository
 			- *Factory

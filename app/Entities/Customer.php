@@ -7,7 +7,6 @@ class Customer
 	public function __construct(
 		private int $id,
 		private string $name,
-		private Customer $customer,
 	)
 	{
 
@@ -28,13 +27,11 @@ class Customer
 		$this->name = $name;
 	}
 
-	public function getCustomer(): Customer
+	public function toArray()
 	{
-		return $this->customer;
-	}
-
-	public function setCustomer(int $customer): void
-	{
-		$this->customer = $customer;
+		return [
+			'id' => $this->getId(),
+			'name' => $this->getName(),
+		];
 	}
 }

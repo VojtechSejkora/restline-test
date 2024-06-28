@@ -1,0 +1,59 @@
+[
+  {
+    "id": 332,
+    "orderNumber": "P3920-212",
+    "customerOrderNumber": "mazlík",
+    "createdAt": "2018-12-11T11:40:57+00:00",
+    "closedAt": null,
+    "status": {
+      "id": "ACT",
+      "name": "Active",
+      "createdAt": "2024-06-04T07:56:21+00:00",
+      "user": {
+        "userName": "jan.omacka",
+        "fullName": "Jan Omáčka"
+      }
+    },
+    "customer": 23,
+    "contract": 21,
+    "requestedDeliveryAt": "2018-12-11T11:50:00+00:00"
+  },
+  {
+    "id": 619,
+    "orderNumber": "X4920-902",
+    "customerOrderNumber": "",
+    "createdAt": "2019-12-02T08:40:57+00:00",
+    "closedAt": null,
+    "status": {
+      "id": "NEW",
+      "name": "New",
+      "createdAt": "2022-06-04T07:56:21+00:00",
+      "user": {
+        "userName": "filip.houst",
+        "fullName": "Filip Houšť"
+      }
+    },
+    "customer": 409,
+    "contract": 321,
+    "requestedDeliveryAt": "2019-12-11T11:50:00+00:00"
+  },
+  {
+    "id": 203,
+    "orderNumber": "M2082-775",
+    "customerOrderNumber": "",
+    "createdAt": "2017-08-01T15:40:57+00:00",
+    "closedAt": "2021-03-04T06:56:00+00:00",
+    "status": {
+      "id": "END",
+      "name": "Closed",
+      "createdAt": "2021-03-04T06:56:00+00:00",
+      "user": {
+        "userName": "jana.fabianova",
+        "fullName": "Jana Fabiánová"
+      }
+    },
+    "customer": 143,
+    "contract": 12,
+    "requestedDeliveryAt": "2017-08-22T13:50:00+00:00"
+  }
+]
