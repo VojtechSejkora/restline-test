@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "43534a57c42cc23f8aa3468cd6754971",
+    "content-hash": "7e699332c59bb7eb0788ecb2ae23a588",
     "packages": [
         {
             "name": "contributte/application",
@@ -233,6 +233,55 @@
                 }
             ],
             "time": "2023-06-04T12:37:12+00:00"
+        },
+        {
+            "name": "jajo/jsondb",
+            "version": "v3.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/donjajo/php-jsondb.git",
+                "reference": "e19b80fb82ed93ab270efb46f86a58fde45e18e6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/donjajo/php-jsondb/zipball/e19b80fb82ed93ab270efb46f86a58fde45e18e6",
+                "reference": "e19b80fb82ed93ab270efb46f86a58fde45e18e6",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.3"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.4",
+                "phpunit/phpunit": "^9.5",
+                "symplify/easy-coding-standard": "dev-main"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "helpers/dataTypes.php",
+                    "helpers/json.php"
+                ],
+                "psr-4": {
+                    "Jajo\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jajo",
+                    "email": "me@donjajo.com"
+                }
+            ],
+            "description": "A PHP Class that reads JSON file as a database. Use for sample DBs",
+            "support": {
+                "issues": "https://github.com/donjajo/php-jsondb/issues",
+                "source": "https://github.com/donjajo/php-jsondb/tree/v3.0.1"
+            },
+            "time": "2022-05-16T10:14:01+00:00"
         },
         {
             "name": "latte/latte",

@@ -1,11 +1,17 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repositories;
+use App\Entities\Order;
+use http\Params;
 use Nette\Utils\Arrays;
 use Nette\Utils\Json;
 class OrderRepository
 {
 
+	public function getAll()
+	{
+		return $this->loadData();
+	}
 	public function loadData() : array
 	{
 		$data = [];
@@ -16,6 +22,11 @@ class OrderRepository
 	}
 
 	public function changeStatus($id, $newStatus) : void
+	{
+
+	}
+
+	public function save(array $data)
 	{
 
 	}
@@ -91,7 +102,4 @@ class OrderRepository
 		}
 		return $data;
 	}
-
-
-
 }

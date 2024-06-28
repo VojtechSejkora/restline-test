@@ -2,7 +2,7 @@
 
 namespace App\UI\Order;
 
-use App\Repository\OrderRepository;
+use App\Repositories\OrderRepository;
 use Tracy\Debugger;
 use Ublaboo\DataGrid\DataGrid;
 
@@ -25,6 +25,7 @@ class OrderDataGridFactory
 		$grid = $this->grid;
 
 		Debugger::barDump($grid->getDataSource());
+		$this->grid->setDataSource($this->orderRepository->loadData());
 
 		$grid->addColumnNumber('id', 'id')
 			->setSortable()
