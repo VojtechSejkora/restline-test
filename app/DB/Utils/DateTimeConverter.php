@@ -20,4 +20,9 @@ class DateTimeConverter
 			return DateTime::createFromFormat(DATE_ATOM, $date, new DateTimeZone('UTC'));
 		}
 	}
+
+	public static function createNow()
+	{
+		return new DateTime('now', new DateTimeZone('UTC'));
+	}
 }

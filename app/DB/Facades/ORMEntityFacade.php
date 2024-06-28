@@ -11,6 +11,7 @@ use App\DB\Enums\StatusEnum;
 use App\DB\Repositories\ContractsRepository;
 use App\DB\Repositories\CustomerRepository;
 use App\DB\Repositories\OrderRepository;
+use App\DB\Utils\DateTimeConverter;
 use Nette\InvalidArgumentException;
 use Nette\Utils\DateTime;
 use Tracy\Debugger;
@@ -30,7 +31,7 @@ class ORMEntityFacade
 		$customer = $this->getCustomer($data['customer']);
 		$contract = $this->getContract($data['contract']);
 
-		Debugger::barDump($data);
+
 		return new Order(
 			$data['id'],
 			$data['orderNumber'],
@@ -49,7 +50,7 @@ class ORMEntityFacade
 			return new Status($data['id'], $data['name'], $data['createdAt'], $this->createUser($data['user']));
 		}
 		$status = StatusEnum::from($data);
-		return new Status($status->value, $status->name, new DateTime(timezone: 'UTC'), $this->createUser());
+		return new Status($status->value, $status->name, DateTimeConverter::createNow(), $this->createUser());
 	}
 
 	public function createCustomer(array $data) : Customer
@@ -78,6 +79,7 @@ class ORMEntityFacade
 		if (count($data) == 0) {
 			return new User('vojtech.sejkora', 'Vojtěch Sejkora');
 		} else {
+			Debugger::barDump($data);
 			return new User($data['userName'], $data['fullName']);
 		}
 	}
@@ -85,14 +87,14 @@ class ORMEntityFacade
 	public function getCustomer(int $customerId) : Customer
 	{
 		$data = $this->customerRepository->get($customerId);
-		Debugger::barDump($data);
+
 		return $this->createCustomer($data);
 	}
 
 	public function getContract(int $contractId) : Contract
 	{
 		$data = $this->contractsRepository->get($contractId);
-		Debugger::barDump($data);
+
 		return $this->createContract($data);
 	}
 

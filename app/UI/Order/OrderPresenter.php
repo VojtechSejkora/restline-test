@@ -16,6 +16,10 @@ class OrderPresenter extends BasePresenter
 		Debugger::barDump($orderDataGridFactory);
 	}
 
+	public function actionEdit($id)
+	{
+		$this->template->id = $id;
+	}
 	public function createComponentOrderDataGrid(): ?Nette\ComponentModel\IComponent
 	{
 		return $this->orderDataGridFactory->create();
@@ -23,8 +27,7 @@ class OrderPresenter extends BasePresenter
 
 	public function createComponentOrderEditForm(): ?Nette\ComponentModel\IComponent
 	{
-
-		$form = $this->orderEditFormFactory->create();
+		$form = $this->orderEditFormFactory->create($this->template->id);
 		$form->getComponent('contract')
 			->setHtmlAttribute('data-url', $this->link('loadContract!', '#'));
 		return $form;

@@ -67,7 +67,7 @@ class Status
 			'createdAt' => $this->createdAt,
 			'user' => [
 				"userName" => $this->user->getUserName(),
-				"firstName" => $this->user->getFullName(),
+				"fullName" => $this->user->getFullName(),
 			]
 		];
 	}
