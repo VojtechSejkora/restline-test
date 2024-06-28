@@ -16,7 +16,7 @@ database:
 
 latte:
 	strictTypes: yes
-	strictParsing: yes
+	strictParsing: no # bacause of ublaboo pagginator need this
 	extensions:
 		- App\UI\Accessory\LatteExtension
 
@@ -33,3 +33,6 @@ logging:
 	logDir: %appDir%/../log
 	loggers:
 		- Contributte\Logging\FileLogger(%appDir%/../log)
+
+includes:
+	- tracy.neon

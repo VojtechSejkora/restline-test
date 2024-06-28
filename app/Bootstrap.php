@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App;
 
 use Nette\Bootstrap\Configurator;
-
+use Tracy\Debugger;
 
 class Bootstrap
 {
@@ -25,6 +25,10 @@ class Bootstrap
 
 		$configurator->addConfig($appDir . '/config/common.neon');
 		$configurator->addConfig($appDir . '/config/services.neon');
+
+		Debugger::enable(Debugger::Development);
+		$configurator->setDebugMode(true);
+		Debugger::$showBar = true;
 
 		return $configurator;
 	}

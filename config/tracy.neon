@@ -1,0 +1,6 @@
+tracy:
+	# přidá panely do Tracy Bar
+	bar:
+		- Nette\Bridges\DITracy\ContainerPanel
+	showBar: true
+	showLocation: true
