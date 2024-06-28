@@ -12,3 +12,6 @@ xdebug-off: ## Disable XDebug
 	docker-compose stop
 	docker-compose start
 	@echo
+
+database:
+	cp db/seeds/* db
