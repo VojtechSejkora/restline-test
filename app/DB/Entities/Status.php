@@ -1,27 +1,30 @@
 <?php
 
-namespace App\Entities;
+namespace App\DB\Entities;
 
-use App\Enums\StatusEnum;
+use App\DB\Utils\DateTimeConverter;
 use Nette\Utils\DateTime;
 
 class Status
 {
+	private DateTime $createdAt;
+
 	public function __construct(
-		private int $id,
+		private string $id,
 		private string $name,
-		private DateTime $createdAt,
+		DateTime|string $createdAt,
 		private User $user
 	)
 	{
+		$this->createdAt = DateTimeConverter::createDateTime($createdAt);
 	}
 
-	public function getId(): int
+	public function getId(): string
 	{
 		return $this->id;
 	}
 
-	public function setId(int $id): void
+	public function setId(string $id): void
 	{
 		$this->id = $id;
 	}

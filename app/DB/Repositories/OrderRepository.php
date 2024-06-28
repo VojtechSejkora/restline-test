@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repositories;
-use App\Entities\Order;
-use App\Entities\Status;
+namespace App\DB\Repositories;
+use App\DB\Entities\Order;
+use App\DB\Entities\Status;
 use Jajo\JSONDB;
 use Tracy\Debugger;
 
@@ -23,25 +23,14 @@ class OrderRepository
 
 	public function loadData() : array
 	{
-		$data = [];
-		$orders = $this->db->select( '*' )
+		return $this->db->select( '*' )
 			->from( self::DB_FILE )
 			->get();
-
-		Debugger::barDump($orders);
-		foreach ($orders as $item) {
-			$data[] = $this->flatten($item);
-		}
-		return $data;
 	}
 
 	public function changeStatus(int $orderId, Status $newStatus) : void
 	{
-		$order = $this->db->select( '*' )
-			->from( self::DB_FILE )
-			->where([ 'id' => $orderId ] )
-			->get();
-
+		$order = $this->get($orderId);
 
 		if ($order['status']['id'] == $newStatus->getId()) {
 			return;
@@ -65,10 +54,15 @@ class OrderRepository
 
 	public function get(int $orderId)
 	{
-		return $this->db->select('*')
+		$result = $this->db->select('*')
 			->from(self::DB_FILE)
 			->where(['id' => $orderId])
 			->get();
+
+		if (count($result) == 1) {
+			return $result[0];
+		}
+		return $result;
 	}
 
 	private static function flatten(array $data) : array

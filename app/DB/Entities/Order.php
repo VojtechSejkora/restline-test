@@ -1,29 +1,32 @@
 <?php
 
-namespace App\Entities;
+namespace App\DB\Entities;
 
+use App\DB\Utils\DateTimeConverter;
 use DateTimeZone;
-use Nette\Database\DateTime;
+use Nette\Utils\DateTime;
 
 class Order
 {
+	private DateTime $createdAt;
+	private ?Datetime $closedAt = null;
+
+	private Datetime $requestDeliveryAt;
+
 	public function __construct(
 		private int $id,
 		private string $orderNumber,
-		private DateTime $createdAt,
-		private ?DateTime $closedAt,
+		DateTime|string $createdAt,
+		DateTime|null|string $closedAt,
 		private Status $status,
 		private Customer $customer,
 		private Contract $contract,
-		private DateTime $requestDeliveryAt,
+		DateTime|string $requestedDeliveryAt,
 	)
 	{
-		$UTC = new DateTimeZone("UTC");
-		$this->createdAt->setTimezone($UTC);
-		if ($this->closedAt) {
-			$this->closedAt->setTimezone($UTC);
-		}
-
+		$this->createdAt = DateTimeConverter::createDateTime($createdAt);
+		$this->closedAt = DateTimeConverter::createDateTime($closedAt);
+		$this->requestDeliveryAt = DateTimeConverter::createDateTime($requestedDeliveryAt);
 	}
 
 	public function getId(): int
@@ -96,12 +99,12 @@ class Order
 		$this->contract = $contract;
 	}
 
-	public function getRequestDeliveryAt(): DateTime
+	public function getRequestedDeliveryAt(): DateTime
 	{
 		return $this->requestDeliveryAt;
 	}
 
-	public function setRequestDeliveryAt(DateTime $requestDeliveryAt): void
+	public function setRequestedDeliveryAt(DateTime $requestDeliveryAt): void
 	{
 		$this->requestDeliveryAt = $requestDeliveryAt;
 	}
@@ -115,9 +118,9 @@ class Order
 		$array = [
 			"id" => $this->getId(),
 			"orderNumber" => $this->getOrderNumber(),
-			"createdAt" => $this->getCreatedAt()->format("Y-m-dTH:i:sP"),
-			"closedAt" => $this->getClosedAt()->format("Y-m-dTH:i:sP"),
-			"requestedDeliveryAt" => $this->getRequestDeliveryAt()->format("Y-m-dTH:i:sP"),
+			"createdAt" => $this->getCreatedAt()->format(DATE_ATOM),
+			"closedAt" => $this->getClosedAt()?->format(DATE_ATOM),
+			"requestedDeliveryAt" => $this->getRequestedDeliveryAt()->format(DATE_ATOM),
 		];
 
 		if ($deep) {
@@ -134,8 +137,9 @@ class Order
 			];
 		}
 		return array_merge($array, $objectsArray);
-		
 	}
+
+
 
 
 }

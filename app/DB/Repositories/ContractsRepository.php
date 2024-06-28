@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\DB\Repositories;
 
 use Jajo\JSONDB;
 
@@ -24,18 +24,28 @@ class ContractsRepository
 
 	public function getByCustomer($customerId)
 	{
-		return $this->db->select( '*' )
+		$result = $this->db->select( '*' )
 			->from( self::DB_FILE )
 			->where( ['customer' => $customerId] )
 			->get();
+		if (count($result) == 1) {
+			return $result[0];
+		}
+		return $result;
 	}
 
 	public function get($contractId)
 	{
-		return $this->db->select( '*' )
+		$result = $this->db->select( '*' )
 			->from( self::DB_FILE )
 			->where( ['id' => $contractId] )
 			->get();
+
+
+		if (count($result) == 1) {
+			return $result[0];
+		}
+		return $result;
 
 	}
 }

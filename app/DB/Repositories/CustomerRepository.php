@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\DB\Repositories;
 
 use Jajo\JSONDB;
 
@@ -23,10 +23,14 @@ class CustomerRepository
 
 	public function get(int $customerId)
 	{
-		return $this->db->select( '*' )
+		$result = $this->db->select( '*' )
 			->from(self::DB_FILE)
 			->where( ['id' => $customerId ])
 			->get();
 
+		if (count($result) == 1) {
+			return $result[0];
+		}
+		return $result;
 	}
 }

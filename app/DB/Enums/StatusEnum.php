@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums;
+namespace App\DB\Enums;
 
 enum StatusEnum: string
 {
