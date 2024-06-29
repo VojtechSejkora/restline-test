@@ -15,7 +15,7 @@ class BasePresenter extends Presenter
     public function startup(): void
     {
         parent::startup();
-        if (! $this->template->basePath) {
+        if (!isset($this->template->basePath)) {
             $this->template->add('basePath', '');
         }
     }

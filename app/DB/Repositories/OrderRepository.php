@@ -43,25 +43,31 @@ class OrderRepository
     {
         $order = $this->get($orderId);
 
-        if (is_array($order['status']) && $order['status']['id'] === $newStatus->getId()) {
+        if (is_array($order['status'])) {
+            $oldStatusId = $order['status']['id'];
+        } else {
+            $oldStatusId = $order['status'];
+        }
+
+        if ($oldStatusId == $newStatus->getId()) {
             return;
         }
 
         $order['status'] = $newStatus->toArray();
 
-        $this->_save($order);
+        $this->forceSave($order);
     }
 
     public function save(Order $order): void
     {
-        $this->_save($order->toArray(true));
+        $this->forceSave($order->toArray(true));
     }
 
     /**
      * @param OrderArray $order
      * @return void
      */
-    private function _save(array $order): void
+    public function forceSave(array $order): void
     {
         $jsonData = json_encode($order);
         Debugger::log("Storing id {$order['id']} data {$jsonData}");

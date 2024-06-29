@@ -45,7 +45,7 @@ class Status
         $this->name = $name;
     }
 
-    public function getCreatedAt(): string
+    public function getCreatedAt(): DateTime
     {
         return $this->createdAt;
     }
