@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\UI\Common;
 
 use Nette\Application\UI\Presenter;
@@ -10,11 +12,11 @@ use Nette\Bridges\ApplicationLatte\DefaultTemplate;
  */
 class BasePresenter extends Presenter
 {
-	function startup(): void
-	{
-		parent::startup();
-		if (!$this->template->basePath) {
-			$this->template->add('basePath', '');
-		}
-	}
+    public function startup(): void
+    {
+        parent::startup();
+        if (! $this->template->basePath) {
+            $this->template->add('basePath', '');
+        }
+    }
 }
