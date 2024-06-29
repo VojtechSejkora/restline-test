@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\UI\Order;
 
+use App\DB\Facades\ORMEntityFacade;
 use App\UI\Common\BasePresenter;
 use Nette;
 use Nette\Application\UI\Form;
@@ -16,6 +17,7 @@ class OrderPresenter extends BasePresenter
     public function __construct(
         private readonly OrderDataGridFactory $orderDataGridFactory,
         private readonly OrderEditFormFactory $orderEditFormFactory,
+        private readonly ORMEntityFacade $ORMEntityFacade,
     ) {
         parent::__construct();
     }
@@ -38,12 +40,18 @@ class OrderPresenter extends BasePresenter
         if ($this->orderId === null) {
             throw new \LogicException("There should be set orderId from actionDetail");
         }
-        $orderId = $this->orderId;
-        return $this->orderEditFormFactory->create($orderId, $this->link('loadContract!', '#'));
+
+        $order = $this->ORMEntityFacade->getOrder($this->orderId);
+
+        if ($order === null) {
+            $this->error('Not found order id');
+        }
+
+        return $this->orderEditFormFactory->create($order, $this->link('loadContract!', '#'));
     }
 
-    public function handleLoadContract(int $customerId): void
+    public function handleLoadContract(string $customerId): void
     {
-        $this->sendJson($this->orderEditFormFactory->loadContracts($customerId));
+        $this->sendJson($this->orderEditFormFactory->loadContracts((int) $customerId));
     }
 }

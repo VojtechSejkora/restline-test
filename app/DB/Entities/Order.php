@@ -119,14 +119,15 @@ class Order
      * @param bool $deep - when true, it will expand inner parameters into array, otherwise it will just print ids of object
      * @return OrderArray
      */
-    public function toArray(bool $deep = false): array
+    public function toArray(bool $deep = False, bool $serialize = True): array
     {
+
         $array = [
             "id" => $this->getId(),
             "orderNumber" => $this->getOrderNumber(),
-            "createdAt" => DateTimeConverter::toSerialize($this->getCreatedAt()) ?? throw new \LogicException("CratedAt can not be null"),
-            "closedAt" => DateTimeConverter::toSerialize($this->getClosedAt()),
-            "requestedDeliveryAt" => DateTimeConverter::toSerialize($this->getRequestedDeliveryAt()),
+            "createdAt" => $serialize ? DateTimeConverter::toSerialize($this->getCreatedAt()) : DateTimeConverter::format($this->getRequestedDeliveryAt()) ?? throw new \LogicException("CratedAt can not be null"),
+            "closedAt" => $serialize ? DateTimeConverter::toSerialize($this->getClosedAt()) : DateTimeConverter::format($this->getClosedAt()),
+            "requestedDeliveryAt" => $serialize ? DateTimeConverter::toSerialize($this->getRequestedDeliveryAt()) : DateTimeConverter::format($this->getRequestedDeliveryAt()),
             "customer" => $this->getCustomer()->getId(),
             "contract" => $this->getContract()->getId(),
         ];

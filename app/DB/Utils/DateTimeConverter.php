@@ -44,7 +44,7 @@ class DateTimeConverter
 
         $datetime = clone $time;
         $datetime->setTimezone(new DateTimeZone('Europe/Prague'));
-        return $datetime->format('Y-m-d H:i:s');
+        return $datetime->format('Y-m-d H:i:s P');
     }
 
     public static function toSerialize(?DateTime $time): ?string

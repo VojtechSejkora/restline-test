@@ -27,12 +27,11 @@ class OrderEditFormFactory
     ) {
     }
 
-    public function create(int $orderId, string $linkChangeData): Form
+    public function create(Order $order, string $linkChangeData): Form
     {
-        $order = $this->ORMEntityFacade->getOrder($orderId);
         $form = new Form();
         $form->addProtection();
-        $form->addHidden("id", $orderId);
+        $form->addHidden("id", $order->getId());
 
         $form->addSubmit('save', 'Save');
 
@@ -43,7 +42,6 @@ class OrderEditFormFactory
             ->setRequired();
 
         $form->addDateTime('requestedDeliveryAt', 'Delivery at', withSeconds: true)
-            ->setFormat("Y-m-d H:i:s")
             ->setRequired();
 
         $customersForSelect = $this->prepareForSelect($this->ORMEntityFacade->getCustomers());
@@ -96,7 +94,7 @@ class OrderEditFormFactory
             }
         };
 
-        $form->setDefaults($order->toArray());
+        $form->setDefaults($order->toArray(serialize: False));
 
         return $form;
     }
@@ -117,9 +115,10 @@ class OrderEditFormFactory
     public function processOrderEditForm(Form $form): void
     {
         /** @var array<string, mixed> $data */
-        $data = $form->getValues();
+        $data = (array) $form->getValues();
+        $data['id'] = (int) $data['id'];
         $data['createdAt'] = DateTimeConverter::createNow();
-        $data['requestedDeliveryAt'] = DateTime::createFromFormat("Y-m-d H:i:s", $data['requestedDeliveryAt'], new \DateTimeZone('Europe/Prague'));
+        $data['requestedDeliveryAt'] = DateTime::createFromFormat("Y-m-d H:i:s", $data['requestedDeliveryAt']->format("Y-m-d H:i:s"), new \DateTimeZone('Europe/Prague'));
 
         /** @var OrderArray $data */
         $this->orderRepository->save($this->ORMEntityFacade->createOrder($data));

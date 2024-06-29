@@ -129,9 +129,12 @@ readonly class ORMEntityFacade
         return $this->createContract($data);
     }
 
-    public function getOrder(int $orderId): Order
+    public function getOrder(int $orderId): ?Order
     {
         $data = $this->orderRepository->get($orderId);
+        if (empty($data)) {
+            return null;
+        }
         return $this->createOrder($data);
     }
 

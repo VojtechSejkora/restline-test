@@ -87,10 +87,10 @@ class OrderDataGridFactory
         return $grid;
     }
 
-    public function processStatusChange(int $id, string $newStatus): void
+    public function processStatusChange(string $id, string $newStatus): void
     {
         $newStatus = $this->ORMEntityFacade->createStatus($newStatus);
-        $this->orderRepository->changeStatus($id, $newStatus);
+        $this->orderRepository->changeStatus((int) $id, $newStatus);
         $this->grid->setDataSource($this->getDataSource());
         $presenter = $this->grid->getPresenter();
         if ($presenter?->isAjax()) {
