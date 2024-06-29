@@ -3,6 +3,7 @@
 namespace App\DB\Entities;
 
 use App\DB\Utils\DateTimeConverter;
+use DateTimeImmutable;
 use DateTimeZone;
 use Nette\Utils\DateTime;
 
@@ -16,12 +17,12 @@ class Order
 	public function __construct(
 		private int $id,
 		private string $orderNumber,
-		DateTime|string $createdAt,
-		DateTime|null|string $closedAt,
+		DateTimeImmutable|DateTime|string $createdAt,
+		DateTimeImmutable|DateTime|null|string $closedAt,
 		private Status $status,
 		private Customer $customer,
 		private Contract $contract,
-		DateTime|string $requestedDeliveryAt,
+		DateTimeImmutable|DateTime|string $requestedDeliveryAt,
 	)
 	{
 		$this->createdAt = DateTimeConverter::createDateTime($createdAt);
@@ -110,30 +111,29 @@ class Order
 	}
 
 	/**
-	 * @param $deep - when true, it will expand inner parameters into array, otherwise it will just print ids of object
+	 * @param false $deep - when true, it will expand inner parameters into array, otherwise it will just print ids of object
 	 * @return array
 	 */
-	public function toArray($deep = false): array
+	public function toArray(bool $deep = false): array
 	{
 		$array = [
 			"id" => $this->getId(),
 			"orderNumber" => $this->getOrderNumber(),
-			"createdAt" => $this->getCreatedAt()->format(DATE_ATOM),
-			"closedAt" => $this->getClosedAt()?->format(DATE_ATOM),
-			"requestedDeliveryAt" => $this->getRequestedDeliveryAt()->format(DATE_ATOM),
+			"createdAt" =>  DateTimeConverter::toSerialize($this->getCreatedAt()),
+			"closedAt" =>  DateTimeConverter::toSerialize($this->getClosedAt()),
+			"requestedDeliveryAt" => DateTimeConverter::toSerialize($this->getRequestedDeliveryAt()),
+			"customer" => $this->getCustomer()->getId(),
+			"contract" => $this->getContract()->getId(),
+
 		];
 
 		if ($deep) {
 			$objectsArray = [
-				"status" => $this->getStatus()->toArray($deep),
-				"customer" => $this->getCustomer()->toArray(),
-				"contract" => $this->getContract()->toArray(),
+				"status" => $this->getStatus()->toArray(),
 			];
 		} else {
 			$objectsArray  = [
 				"status" => $this->getStatus()->getId(),
-				"customer" => $this->getCustomer()->getId(),
-				"contract" => $this->getContract()->getId(),
 			];
 		}
 		return array_merge($array, $objectsArray);

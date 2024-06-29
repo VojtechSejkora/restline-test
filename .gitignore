@@ -4,5 +4,5 @@
 
 .DS_Store
 
-db/
-!db/seeds
+./db/
+!./db/seeds

@@ -17,6 +17,8 @@
 	<script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
 	<![endif]-->
 
+	<script src="https://unpkg.com/naja@2/dist/Naja.min.js"></script>
+
 	<script src="{$basePath}/dependent-select/js/script.js"></script>
 </head>
 <body>
@@ -30,6 +32,11 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<script src="{$basePath}/bootstrap/js/bootstrap.min.js"></script>
 	<script src="https://unpkg.com/nette-forms@3/src/assets/netteForms.js"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			naja.initialize();
+		});
+	</script>
 	{/block}
 </body>
 </html>

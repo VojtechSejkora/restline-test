@@ -24,14 +24,10 @@ class ContractsRepository
 
 	public function getByCustomer($customerId)
 	{
-		$result = $this->db->select( '*' )
+		return $this->db->select( '*' )
 			->from( self::DB_FILE )
 			->where( ['customer' => $customerId] )
 			->get();
-		if (count($result) == 1) {
-			return $result[0];
-		}
-		return $result;
 	}
 
 	public function get($contractId)

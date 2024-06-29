@@ -36,7 +36,7 @@ class ORMEntityFacade
 			$data['id'],
 			$data['orderNumber'],
 			$data['createdAt'],
-			$data['closedAt'],
+			$data['closedAt'] ?? null,
 			$this->createStatus($data['status']),
 			$customer,
 			$contract,
@@ -79,7 +79,6 @@ class ORMEntityFacade
 		if (count($data) == 0) {
 			return new User('vojtech.sejkora', 'Vojtěch Sejkora');
 		} else {
-			Debugger::barDump($data);
 			return new User($data['userName'], $data['fullName']);
 		}
 	}
@@ -115,5 +114,32 @@ class ORMEntityFacade
 			$orders[] = $this->createOrder($item);
 		}
 		return $orders;
+	}
+
+	/**
+	 * @return array<Customer>
+	 */
+	public function getCustomers(): array
+	{
+		$data = $this->customerRepository->getAll();
+		$customer = [];
+		foreach ($data as $item) {
+			$customer[] = $this->createCustomer($item);
+		}
+		return $customer;
+	}
+
+	/**
+	 * @param int $customerId
+	 * @return array<Contract>
+	 */
+	public function getContractsByCustomerId(int $customerId) : array
+	{
+		$data = $this->contractsRepository->getByCustomer($customerId);
+		$contracts = [];
+		foreach ($data as $item) {
+			$contracts[] = $this->createContract($item);
+		}
+		return $contracts;
 	}
 }

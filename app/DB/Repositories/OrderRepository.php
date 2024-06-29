@@ -5,6 +5,7 @@ use App\DB\Entities\Order;
 use App\DB\Entities\Status;
 use Jajo\JSONDB;
 use Tracy\Debugger;
+use Tracy\ILogger;
 
 class OrderRepository
 {
@@ -38,17 +39,21 @@ class OrderRepository
 
 		$order['status'] = $newStatus->toArray();
 
-		$this->db->update( $order )
-			->from( self::DB_FILE )
-			->where( [ 'id' => $orderId ] )
-			->trigger();
+		$this->_save($order);
 	}
 
 	public function save(Order $order)
 	{
-		$this->db->update( $order->toArray(true) )
+		$this->_save($order->toArray(true));
+	}
+
+	public function _save(array $order)
+	{
+		$jsonData = json_encode($order);
+		Debugger::log("Storing id {$order['id']} data {$jsonData}");
+		$this->db->update($order)
 			->from( self::DB_FILE )
-			->where( [ 'id' => $order->getId() ] )
+			->where( [ 'id' => $order['id'] ] )
 			->trigger();
 	}
 

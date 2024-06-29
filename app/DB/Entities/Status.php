@@ -3,6 +3,7 @@
 namespace App\DB\Entities;
 
 use App\DB\Utils\DateTimeConverter;
+use DateTimeImmutable;
 use Nette\Utils\DateTime;
 
 class Status
@@ -12,7 +13,7 @@ class Status
 	public function __construct(
 		private string $id,
 		private string $name,
-		DateTime|string $createdAt,
+		DateTimeImmutable|DateTime|string $createdAt,
 		private User $user
 	)
 	{
@@ -59,12 +60,12 @@ class Status
 		$this->user = $user;
 	}
 
-	public function toArray($deep = false): array
+	public function toArray(): array
 	{
 		return [
 			'id' => $this->id,
 			'name' => $this->name,
-			'createdAt' => $this->createdAt,
+			'createdAt' =>  DateTimeConverter::toSerialize($this->createdAt),
 			'user' => [
 				"userName" => $this->user->getUserName(),
 				"fullName" => $this->user->getFullName(),

@@ -16,7 +16,7 @@ class CustomerRepository
 
 	public function getAll() : array
 	{
-		return $this->db->select( ['id', 'name'] )
+		return $this->db->select('*' )
 			->from(self::DB_FILE)
 			->get();
 	}

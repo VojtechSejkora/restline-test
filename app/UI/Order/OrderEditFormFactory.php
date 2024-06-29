@@ -2,28 +2,30 @@
 
 namespace App\UI\Order;
 
-use App\Entities\Contract;
-use App\Entities\Order;
-use App\Enums\StatusEnum;
-use App\Repositories\ContractsRepository;
-use App\Repositories\CustomerRepository;
-use App\Repositories\OrderRepository;
+use App\DB\Enums\StatusEnum;
+use App\DB\Facades\ORMEntityFacade;
+use App\DB\Repositories\ContractsRepository;
+use App\DB\Repositories\CustomerRepository;
+use App\DB\Repositories\OrderRepository;
+use App\DB\Utils\DateTimeConverter;
 use Nette\Application\UI\Form;
+use Nette\Forms\Controls\DateTimeControl;
+use Nette\Utils\DateTime;
 use Tracy\Debugger;
 
 class OrderEditFormFactory
 {
 
 	public function __construct(
-		private readonly CustomerRepository $customerRepository,
-		private readonly ContractsRepository $contractsRepository,
 		private readonly OrderRepository $orderRepository,
+		private readonly ORMEntityFacade $ORMEntityFacade,
 	)
 	{
 	}
 
 	public function create(int $orderId) : Form
 	{
+		$order = $this->ORMEntityFacade->getOrder($orderId);
 		$form = new Form();
 		$form->addProtection();
 		$form->addHidden("id", $orderId);
@@ -37,15 +39,18 @@ class OrderEditFormFactory
 			->setRequired();
 
 
-		$form->addDateTime( 'deliveryAt','Delivery at')
+		$form->addDateTime( 'requestedDeliveryAt','Delivery at', withSeconds: True)
+			->setFormat("Y-m-d H:i:s")
 			->setRequired();
 
-		$customer = $form->addSelect( 'customer','Customer', $this->customerRepository->getAll())
+		$customersForSelect = $this->prepareForSelect($this->ORMEntityFacade->getCustomers());
+		$customer = $form->addSelect( 'customer','Customer', $customersForSelect)
 			->setPrompt('Select customer')
 			->addRule(Form::Filled)
 			->setRequired();
 
-		$contract = $form->addSelect( 'contract','Contract')
+		$contractsForSelect =  $this->loadContracts($order->getCustomer()->getId());
+		$contract = $form->addSelect( 'contract','Contract', $contractsForSelect)
 			->setPrompt('Select contract')
 			->addRule(Form::Filled)
 			->setHtmlAttribute('data-depends', $customer->getHtmlName())
@@ -57,24 +62,49 @@ class OrderEditFormFactory
 
 		$form->onAnchor[] = fn() =>
 			$contract->setItems($customer->getValue()
-				? $this->contractsRepository->get($customer->getValue())
+				? $this->loadContracts($customer->getValue())
 				: []);
 
 		$form->onSuccess[] = [$this, 'processOrderEditForm'];
+		$form->onSubmit[] = function ($form) {
+			if ($form->getPresenter()->isAjax()) {
+				$form->getPresenter()->redrawControl('orderEditFormSniper');
+			}
+		};
 
-		$form->setDefaults($this->orderRepository->get($orderId)->toArray());
+		$form->setDefaults($order->toArray());
+
 
 		return $form;
 	}
 
-	public function handleLoadContract($customerId) {
-		return $this->contractsRepository->get($customerId);
+	public function loadContracts($customerId) {
+		return $this->prepareForSelect($this->ORMEntityFacade->getContractsByCustomerId($customerId));
 	}
 
 	public function processOrderEditForm(Form $form, array $data)
 	{
+		$data['createdAt'] = DateTimeConverter::createNow();
+		$data['requestedDeliveryAt'] = DateTime::createFromFormat("Y-m-d H:i:s", $data['requestedDeliveryAt'], new \DateTimeZone('Europe/Prague'));
 
-		$this->orderRepository->save($data);
+		$this->orderRepository->save($this->ORMEntityFacade->createOrder($data));
+
+		if ($form->getPresenter()->isAjax()) {
+			$form->getPresenter()->redrawControl('orderEditFormSniper');
+		} else {
+			$form->getPresenter()->redirect('this');
+		}
+	}
+
+	private function prepareForSelect(array $data)
+	{
+		// return array_merge(... array_map(fn ($item) => ["{$item->getId()}" => $item->getName()], $data));
+		// ^ this do not work due to integer keys
+		$forSelect = [];
+		foreach ($data as $item) {
+			$forSelect[$item->getId()] = $item->getName();
+		}
+		return $forSelect;
 
 	}
 }

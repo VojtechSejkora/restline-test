@@ -2,33 +2,38 @@
 
 <h1>Seznam objednavek</h1>
 
-<form n:name="orderEditForm" class="container-fluid">
-	<div class="row">
-		<div class="col-sm-8">
-			{foreach $form->getGroup('left')->getControls() as $input}
-				{if ($input->getOption('type') !== 'hidden')}
-					<div class="form-group">
-						{label $input, class=> 'form-label' /}
-						{input $input, class=>'form-control'}
-						{inputError $input}
-					</div>
-				{/if}
+{snippet orderEditFormSniper}
+	<form n:name="orderEditForm" class="container-fluid ajax">
+		<div class="row">
+			<div class="col-sm-8">
+				{foreach $form->getGroup('left')->getControls() as $input}
+					{if ($input->getOption('type') !== 'hidden')}
+						<div class="form-group">
+							{label $input, class=> 'form-label' /}
+							{input $input, class=>'form-control'}
+							{inputError $input}
+						</div>
+					{/if}
 
-			{/foreach}
+				{/foreach}
+			</div>
+			<div class="col-sm-4">
+				{foreach $form->getGroup('right')->getControls() as $input}
+					{if ($input->getOption('type') !== 'hidden')}
+						<div class="form-group">
+							{label $input /}
+							{input $input, class=>'form-control'}
+							{inputError $input}
+						</div>
+					{/if}
+				{/foreach}
+			</div>
 		</div>
-		<div class="col-sm-4">
-			{foreach $form->getGroup('right')->getControls() as $input}
-				{if ($input->getOption('type') !== 'hidden')}
-					<div class="form-group">
-						{label $input /}
-						{input $input, class=>'form-control'}
-						{inputError $input}
-					</div>
-				{/if}
-			{/foreach}
+		<div class="row">
+			<input n:name="save" type="submit" class="btn-group-justified">
 		</div>
-	</div>
-	<div class="row">
-		<input n:name="save" type="submit" class="btn-group-justified">
-	</div>
-</form>
+	</form>
+	<script>
+		registerDataDepends()
+	</script>
+{/snippet}
