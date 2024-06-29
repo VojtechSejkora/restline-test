@@ -2,6 +2,7 @@
 
 namespace App\DB\Facades;
 
+use \LogicException;
 use App\DB\Entities\Contract;
 use App\DB\Entities\Customer;
 use App\DB\Entities\Order;
@@ -16,16 +17,26 @@ use Nette\InvalidArgumentException;
 use Nette\Utils\DateTime;
 use Tracy\Debugger;
 
-class ORMEntityFacade
+/**
+ * @phpstan-import-type CustomerArray from Customer
+ * @phpstan-import-type ContractArray from Contract
+ * @phpstan-import-type OrderArray from Order
+ * @phpstan-import-type StatusArray from Status
+ */
+readonly class ORMEntityFacade
 {
 	public function __construct(
-		private readonly OrderRepository $orderRepository,
-		private readonly CustomerRepository $customerRepository,
-		private readonly ContractsRepository $contractsRepository,
+		private OrderRepository $orderRepository,
+		private CustomerRepository $customerRepository,
+		private ContractsRepository $contractsRepository,
 	)
 	{
 	}
 
+	/**
+	 * @param OrderArray $data
+	 * @return Order
+	 */
 	public function createOrder(array $data) : Order
 	{
 		$customer = $this->getCustomer($data['customer']);
@@ -40,10 +51,14 @@ class ORMEntityFacade
 			$this->createStatus($data['status']),
 			$customer,
 			$contract,
-			$data['requestedDeliveryAt'],
+			$data['requestedDeliveryAt'] ?? null,
 		);
 	}
 
+	/**
+	 * @param StatusArray|string $data
+	 * @return Status
+	 */
 	public function createStatus(array|string $data) : Status
 	{
 		if (is_array($data)) {
@@ -53,6 +68,10 @@ class ORMEntityFacade
 		return new Status($status->value, $status->name, DateTimeConverter::createNow(), $this->createUser());
 	}
 
+	/**
+	 * @param CustomerArray $data
+	 * @return Customer
+	 */
 	public function createCustomer(array $data) : Customer
 	{
 		return new Customer(
@@ -61,19 +80,31 @@ class ORMEntityFacade
 		);
 	}
 
+	/**
+	 * @param array{id:int, name:string, customer?:int} $data
+	 * @param Customer|null $customer
+	 * @return Contract
+	 */
 	public function createContract(array $data, ?Customer $customer = null) : Contract
 	{
-		if (is_null($customer) && (!isset($data['customer']) || !is_int($data['customer']))) {
+		if (is_null($customer) && key_exists('customer', $data)) {
+			$customer = $this->getCustomer($data['customer']);
+		}
+		if (is_null($customer)) {
 			throw new InvalidArgumentException('It is necessary to provide $customer or has customer id (int) in $data');
 		}
 
 		return new Contract(
 			$data['id'],
 			$data['name'],
-			$customer ?? $this->getCustomer($data['customer']),
+			$customer,
 		);
 	}
 
+	/**
+	 * @param array{}|array{userName:string, fullName:string} $data
+	 * @return User
+	 */
 	public function createUser(array $data = []) : User
 	{
 		if (count($data) == 0) {
@@ -94,6 +125,9 @@ class ORMEntityFacade
 	{
 		$data = $this->contractsRepository->get($contractId);
 
+		if (empty($data)) {
+			throw new LogicException("Not found contract by contractId: {$contractId}");
+		}
 		return $this->createContract($data);
 	}
 

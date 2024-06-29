@@ -2,6 +2,9 @@
 
 namespace App\DB\Entities;
 
+/**
+ * @phpstan-type CustomerArray array{id: int, name: string}
+ */
 class Customer
 {
 	public function __construct(
@@ -10,6 +13,11 @@ class Customer
 	)
 	{
 
+	}
+
+	public function setId(int $id) : void
+	{
+		$this->id = $id;
 	}
 
 	public function getId(): int
@@ -27,7 +35,10 @@ class Customer
 		$this->name = $name;
 	}
 
-	public function toArray()
+	/**
+	 * @return CustomerArray
+	 */
+	public function toArray() : array
 	{
 		return [
 			'id' => $this->getId(),

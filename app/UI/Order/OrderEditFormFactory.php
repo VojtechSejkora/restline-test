@@ -2,6 +2,10 @@
 
 namespace App\UI\Order;
 
+use App\DB\Entities\Contract;
+use App\DB\Entities\Customer;
+use App\DB\Entities\Order;
+use App\DB\Entities\Status;
 use App\DB\Enums\StatusEnum;
 use App\DB\Facades\ORMEntityFacade;
 use App\DB\Repositories\ContractsRepository;
@@ -10,9 +14,13 @@ use App\DB\Repositories\OrderRepository;
 use App\DB\Utils\DateTimeConverter;
 use Nette\Application\UI\Form;
 use Nette\Forms\Controls\DateTimeControl;
+use Nette\Forms\Controls\SelectBox;
 use Nette\Utils\DateTime;
 use Tracy\Debugger;
 
+/**
+ * @phpstan-import-type OrderArray from Order
+ */
 class OrderEditFormFactory
 {
 
@@ -23,7 +31,7 @@ class OrderEditFormFactory
 	{
 	}
 
-	public function create(int $orderId) : Form
+	public function create(int $orderId, string $linkChangeData) : Form
 	{
 		$order = $this->ORMEntityFacade->getOrder($orderId);
 		$form = new Form();
@@ -54,49 +62,82 @@ class OrderEditFormFactory
 			->setPrompt('Select contract')
 			->addRule(Form::Filled)
 			->setHtmlAttribute('data-depends', $customer->getHtmlName())
+			->setHtmlAttribute('data-url', $linkChangeData)
 			->setRequired();
 
 		$form->addGroup('right');
 		$statuses = array_merge(... array_map(fn($item) => [$item->value => $item->name], StatusEnum::cases()));
 		$form->addSelect('status', 'Status', $statuses);
 
-		$form->onAnchor[] = fn() =>
-			$contract->setItems($customer->getValue()
-				? $this->loadContracts($customer->getValue())
-				: []);
+		$form->onAnchor[] = function(Form $form): void {
+			/** @var SelectBox $customer */
+			$customer = $form['customer'];
+			/** @var SelectBox $contract */
+			$contract = $form['contract'];
+			$customerId = $customer->getValue();
 
-		$form->onSuccess[] = [$this, 'processOrderEditForm'];
+			if ($customerId == null) {
+				$contract->setItems([]);
+				return;
+			}
+
+			if (!is_int($customerId)) {
+				throw new \LogicException("CustomerID should be int");
+			}
+
+			$contract->setItems($this->loadContracts($customerId));
+		};
+
+		$form->onSuccess[] = function($form): void {
+				$this->processOrderEditForm($form);
+			};
+
 		$form->onSubmit[] = function ($form) {
-			if ($form->getPresenter()->isAjax()) {
+			$presenter = $form->getPresenter();
+			if ($presenter && $form->getPresenter()->isAjax()) {
 				$form->getPresenter()->redrawControl('orderEditFormSniper');
 			}
 		};
 
 		$form->setDefaults($order->toArray());
 
-
 		return $form;
 	}
 
-	public function loadContracts($customerId) {
+	/**
+	 * @param int $customerId
+	 * @return array<int|string, string>
+	 */
+	public function loadContracts(int $customerId): array
+	{
 		return $this->prepareForSelect($this->ORMEntityFacade->getContractsByCustomerId($customerId));
 	}
 
-	public function processOrderEditForm(Form $form, array $data)
+	/**
+	 * @param Form $form
+	 * @return void
+	 */
+	public function processOrderEditForm(Form $form): void
 	{
+		/** @var array<string, mixed> $data */
+		$data = $form->getValues();
 		$data['createdAt'] = DateTimeConverter::createNow();
 		$data['requestedDeliveryAt'] = DateTime::createFromFormat("Y-m-d H:i:s", $data['requestedDeliveryAt'], new \DateTimeZone('Europe/Prague'));
 
+		/** @var OrderArray $data */
 		$this->orderRepository->save($this->ORMEntityFacade->createOrder($data));
 
-		if ($form->getPresenter()->isAjax()) {
-			$form->getPresenter()->redrawControl('orderEditFormSniper');
-		} else {
-			$form->getPresenter()->redirect('this');
+		$presenter = $form->getPresenter();
+		if ($presenter && $presenter->isAjax()) {
+			$presenter->redrawControl('orderEditFormSniper');
 		}
 	}
 
-	private function prepareForSelect(array $data)
+	/**
+	 * @param array<Customer|Contract|Status> $data
+	 * @return array<int|string, string>
+	 */
+	private function prepareForSelect(array $data) : array
 	{
 		// return array_merge(... array_map(fn ($item) => ["{$item->getId()}" => $item->getName()], $data));
 		// ^ this do not work due to integer keys

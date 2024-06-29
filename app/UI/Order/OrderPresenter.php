@@ -2,43 +2,46 @@
 
 namespace App\UI\Order;
 
-use App\DB\Facades\ORMEntityFacade;
-use App\UI\common\BasePresenter;
+
+use App\UI\Common\BasePresenter;
 use Nette;
-use Tracy\Debugger;
+use Nette\Application\UI\Form;
+use Nette\Application\UI\InvalidLinkException;
 
 class OrderPresenter extends BasePresenter
 {
+	private ?int $orderId = null;
 
 	public function __construct(
 		private readonly OrderDataGridFactory $orderDataGridFactory,
 		private readonly OrderEditFormFactory $orderEditFormFactory,
-		private readonly ORMEntityFacade $ORMEntityFacade,
 	)
 	{
+		parent::__construct();
 	}
 
-	public function actionEdit($id)
+	public function actionEdit(int $id) : void
 	{
-		$this->template->id = $id;
+		$this->orderId = $id;
 	}
 	public function createComponentOrderDataGrid(): ?Nette\ComponentModel\IComponent
 	{
 		return $this->orderDataGridFactory->create();
 	}
 
-	public function createComponentOrderEditForm(): ?Nette\ComponentModel\IComponent
+	/**
+	 * @throws InvalidLinkException
+	 */
+	public function createComponentOrderEditForm(): Form
 	{
-		$orderId = $this->template->id;
-		$form = $this->orderEditFormFactory->create($orderId);
-		$form->getComponent('contract')
-			->setHtmlAttribute('data-url', $this->link('loadContract!', '#'));
-
-
-		return $form;
+		if ($this->orderId == null) {
+			throw new \LogicException("There should be set orderId from actionDetail");
+		}
+		$orderId = $this->orderId;
+		return $this->orderEditFormFactory->create($orderId, $this->link('loadContract!', '#'));
 	}
 
-	public function handleLoadContract($customerId)
+	public function handleLoadContract(int $customerId) : void
 	{
 		$this->sendJson($this->orderEditFormFactory->loadContracts($customerId));
 	}

@@ -2,6 +2,9 @@
 
 namespace App\DB\Entities;
 
+/**
+ * @phpstan-type ContractArray array{id: int, name: string, customer:int}
+ */
 class Contract
 {
 
@@ -45,11 +48,15 @@ class Contract
 		$this->customer = $customer;
 	}
 
-	public function toArray()
+	/**
+	 * @return ContractArray
+	 */
+	public function toArray() : array
 	{
 		return [
 			'id' => $this->getId(),
 			'name' => $this->getName(),
+			'customer' => $this->getCustomer()->getId(),
 		];
 	}
 }

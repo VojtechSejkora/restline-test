@@ -4,8 +4,12 @@ namespace App\DB\Entities;
 
 use App\DB\Utils\DateTimeConverter;
 use DateTimeImmutable;
+use LogicException;
 use Nette\Utils\DateTime;
 
+/**
+ * @phpstan-type StatusArray array{id: string, name: string, createdAt:string, user: array{fullName: string, userName:string}}
+ */
 class Status
 {
 	private DateTime $createdAt;
@@ -17,7 +21,7 @@ class Status
 		private User $user
 	)
 	{
-		$this->createdAt = DateTimeConverter::createDateTime($createdAt);
+		$this->createdAt = DateTimeConverter::createDateTime($createdAt) ?? throw new \LogicException("This shoud never be null");
 	}
 
 	public function getId(): string
@@ -60,12 +64,15 @@ class Status
 		$this->user = $user;
 	}
 
+	/**
+	 * @return StatusArray
+	 */
 	public function toArray(): array
 	{
 		return [
 			'id' => $this->id,
 			'name' => $this->name,
-			'createdAt' =>  DateTimeConverter::toSerialize($this->createdAt),
+			'createdAt' =>  DateTimeConverter::toSerialize($this->createdAt) ?? throw new LogicException("CreateAt can not be null"),
 			'user' => [
 				"userName" => $this->user->getUserName(),
 				"fullName" => $this->user->getFullName(),

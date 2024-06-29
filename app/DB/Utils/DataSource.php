@@ -3,6 +3,7 @@
 namespace App\DB\Utils;
 
 use App\DB\Facades\Error;
+use Closure;
 use Nette\Utils\Strings;
 use Tracy\Debugger;
 use Ublaboo\DataGrid\DataSource\IDataSource;
@@ -10,6 +11,9 @@ use Ublaboo\DataGrid\Utils\Sorting;
 
 class DataSource implements IDataSource
 {
+	/**
+	 * @param array<int, mixed|null> $data
+	 */
 	public function __construct(
 		private array $data
 	)
@@ -21,6 +25,9 @@ class DataSource implements IDataSource
 		return count($this->data);
 	}
 
+	/**
+	 * @return array<null|mixed>
+	 */
 	public function getData(): iterable
 	{
 		return $this->data;
@@ -31,6 +38,10 @@ class DataSource implements IDataSource
 		// TODO: Implement filter() method.
 	}
 
+	/**
+	 * @param array<string, mixed> $condition
+	 * @return IDataSource
+	 */
 	public function filterOne(array $condition): IDataSource
 	{
 		foreach ($this->data as $item) {
@@ -42,10 +53,12 @@ class DataSource implements IDataSource
 				}
 			}
 			if ($all) {
-				return new self([$item]);
+				$this->data = [$item];
+				return $this;
 			}
 		}
-		return new self([]);
+		$this->data = [];
+		return $this;
 	}
 
 	public function limit(int $offset, int $limit): IDataSource
@@ -60,22 +73,21 @@ class DataSource implements IDataSource
 		return $this;
 	}
 
-	public static function get($obj, $column)
+
+	public static function get(object $obj, string $column): null|object|string|int|float
 	{
 		foreach (Strings::split($column, '[\.]') as $selector) {
 			$getMethod = 'get' . ucfirst($selector);
-			try {
-				$obj = $obj->$getMethod();
-			}catch (Error $e) {
-				Debugger::barDump($obj);
-				throw $e;
-			}
+			$obj = $obj->$getMethod();
 		}
 
 		return $obj;
 	}
 
-	private function _sortCall(array $sortType)
+	/**
+	 * @param array<string, string> $sortType
+	 */
+	private function _sortCall(array $sortType) : Closure
 	{
 		foreach ($sortType as $key => $order) {
 			// potentially improve to allow multiple sorting columns

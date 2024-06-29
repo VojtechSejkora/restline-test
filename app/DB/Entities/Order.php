@@ -7,12 +7,16 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Nette\Utils\DateTime;
 
+/**
+ * @phpstan-import-type StatusArray from Status
+ * @phpstan-type OrderArray array{id: int, orderNumber: string, createdAt: string, closedAt?: string|null, requestedDeliveryAt?: string|null, customer: int, contract: int, status: string|StatusArray}
+ */
 class Order
 {
 	private DateTime $createdAt;
 	private ?Datetime $closedAt = null;
 
-	private Datetime $requestDeliveryAt;
+	private ?Datetime $requestedDeliveryAt = null;
 
 	public function __construct(
 		private int $id,
@@ -22,12 +26,12 @@ class Order
 		private Status $status,
 		private Customer $customer,
 		private Contract $contract,
-		DateTimeImmutable|DateTime|string $requestedDeliveryAt,
+		DateTimeImmutable|DateTime|null|string $requestedDeliveryAt,
 	)
 	{
-		$this->createdAt = DateTimeConverter::createDateTime($createdAt);
+		$this->createdAt = DateTimeConverter::createDateTime($createdAt) ?? throw new \LogicException("This shoud never be null");
+		$this->requestedDeliveryAt = DateTimeConverter::createDateTime($requestedDeliveryAt) ;
 		$this->closedAt = DateTimeConverter::createDateTime($closedAt);
-		$this->requestDeliveryAt = DateTimeConverter::createDateTime($requestedDeliveryAt);
 	}
 
 	public function getId(): int
@@ -100,43 +104,38 @@ class Order
 		$this->contract = $contract;
 	}
 
-	public function getRequestedDeliveryAt(): DateTime
+	public function getRequestedDeliveryAt(): ?DateTime
 	{
-		return $this->requestDeliveryAt;
+		return $this->requestedDeliveryAt;
 	}
 
-	public function setRequestedDeliveryAt(DateTime $requestDeliveryAt): void
+	public function setRequestedDeliveryAt(?DateTime $requestDeliveryAt): void
 	{
-		$this->requestDeliveryAt = $requestDeliveryAt;
+		$this->requestedDeliveryAt = $requestDeliveryAt;
 	}
 
 	/**
-	 * @param false $deep - when true, it will expand inner parameters into array, otherwise it will just print ids of object
-	 * @return array
+	 * @param bool $deep - when true, it will expand inner parameters into array, otherwise it will just print ids of object
+	 * @return OrderArray
 	 */
 	public function toArray(bool $deep = false): array
 	{
 		$array = [
 			"id" => $this->getId(),
 			"orderNumber" => $this->getOrderNumber(),
-			"createdAt" =>  DateTimeConverter::toSerialize($this->getCreatedAt()),
+			"createdAt" =>  DateTimeConverter::toSerialize($this->getCreatedAt()) ?? throw new \LogicException("CratedAt can not be null"),
 			"closedAt" =>  DateTimeConverter::toSerialize($this->getClosedAt()),
 			"requestedDeliveryAt" => DateTimeConverter::toSerialize($this->getRequestedDeliveryAt()),
 			"customer" => $this->getCustomer()->getId(),
 			"contract" => $this->getContract()->getId(),
-
 		];
 
 		if ($deep) {
-			$objectsArray = [
-				"status" => $this->getStatus()->toArray(),
-			];
+			$array['status'] = $this->getStatus()->toArray();
 		} else {
-			$objectsArray  = [
-				"status" => $this->getStatus()->getId(),
-			];
+			$array['status'] = $this->getStatus()->getId();
 		}
-		return array_merge($array, $objectsArray);
+		return $array;
 	}
 
 

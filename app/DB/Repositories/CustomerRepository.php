@@ -2,8 +2,15 @@
 
 namespace App\DB\Repositories;
 
+use App\DB\Entities\Contract;
+use App\DB\Entities\Customer;
+use App\DB\Entities\Order;
+use App\DB\Entities\Status;
 use Jajo\JSONDB;
 
+/**
+ * @phpstan-import-type CustomerArray from Customer
+ */
 class CustomerRepository
 {
 	const DB_FILE = "customers.json";
@@ -14,6 +21,9 @@ class CustomerRepository
 	{
 	}
 
+	/**
+	 * @return array<CustomerArray>
+	 */
 	public function getAll() : array
 	{
 		return $this->db->select('*' )
@@ -21,7 +31,11 @@ class CustomerRepository
 			->get();
 	}
 
-	public function get(int $customerId)
+	/**
+	 * @param int $customerId
+	 * @return CustomerArray
+	 */
+	public function get(int $customerId) : array
 	{
 		$result = $this->db->select( '*' )
 			->from(self::DB_FILE)

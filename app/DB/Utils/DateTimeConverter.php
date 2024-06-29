@@ -6,34 +6,37 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Nette\Utils\DateTime;
 use Tracy\Debugger;
+use Tracy\ILogger;
 
 class DateTimeConverter
 {
 	public static function createDateTime(DateTimeImmutable|DateTime|string|null $date) : ?DateTime
 	{
-
 		if ($date == null) {
-			return $date;
+			return null;
 		}
 
 		if ($date instanceof DateTimeImmutable) {
-			$date = DateTime::from($date);
+			try {
+				$date = DateTime::from($date);
+			} catch (\Exception $e) {
+				throw new \LogicException("Date cannot be converted", previous: $e);
+			}
 		}
 
 		if ($date instanceof DateTime) {
-			$date->setTimezone(new DateTimeZone('UTC'));
-			return $date;
+			return $date->setTimezone(new DateTimeZone('UTC'));
 		} else {
-			return DateTime::createFromFormat(DATE_ATOM, $date, new DateTimeZone('UTC'));
+			return DateTime::createFromFormat(DATE_ATOM, $date, new DateTimeZone('UTC'))  ?: null;
 		}
 	}
 
-	public static function createNow()
+	public static function createNow() : DateTime
 	{
 		return new DateTime('now', new DateTimeZone('UTC'));
 	}
 
-	public static function format(?DateTime $time)
+	public static function format(?DateTime $time) : ?string
 	{
 		if ($time == null) {
 			return null;
@@ -44,7 +47,7 @@ class DateTimeConverter
 		return $datetime->format('Y-m-d H:i:s');
 	}
 
-	public static function toSerialize(?DateTime $time)
+	public static function toSerialize(?DateTime $time) : ?string
 	{
 		if ($time == null) {
 			return null;
